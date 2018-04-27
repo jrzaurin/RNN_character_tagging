@@ -31,7 +31,7 @@ def main(predictions_dir, output_dir, colormap='Reds'):
     except os.error:
         pass
     files = glob(os.path.join(predictions_dir, "*"))
-    for i, f in enumerate(files[100:200]):
+    for i, f in enumerate(files[100:110]):
         text, prediction, labels = load(f)
         html = prediction_to_html(text, prediction, labels, cmap=colormap)
         out_path = os.path.join(output_dir, 'part-' + str(i).zfill(5) + ".html")
