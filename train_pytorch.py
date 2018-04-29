@@ -16,26 +16,7 @@ import torch.optim as optim
 from torch.autograd import Variable
 from torch_utils import AverageMeter, Accuracy, RNNCharTagger, BiRNNCharTagger
 
-dir_a = 'data/sklearn_clean/'
-dir_b = 'data/scalaz_clean/'
-# dir_a = 'data/austen_clean/'
-# dir_b = 'data/shakespeare_clean/'
-train_a = glob(os.path.join(dir_a, "train/*"))
-train_b = glob(os.path.join(dir_b, "train/*"))
-val_a = glob(os.path.join(dir_a, "test/*"))
-val_b = glob(os.path.join(dir_b, "test/*"))
-seq_len = 100
-ngen = 1024
-jump_size_a = [20, 200]
-jump_size_b = [20, 200]
-min_jump_size_a = 20
-max_jump_size_a = 200
-min_jump_size_b = 20
-max_jump_size_b = 200
-batch_size = 1024
-seq_len = 100
-juma = [min_jump_size_a, max_jump_size_a]
-jumb = [min_jump_size_b, max_jump_size_b]
+use_cuda = torch.cuda.is_available()
 
 
 def chars_from_files(list_of_files):
@@ -108,6 +89,7 @@ def train(train_gen, model, criterion, optimizer, epoch, steps_per_epoch):
             optimizer.zero_grad()
             y_pred = model(X_var)
             loss = criterion(y_pred, y_var)
+            # if using previous torch versions
             # t.set_postfix(loss=loss.data[0])
             t.set_postfix(loss=loss.item())
             loss.backward()
@@ -133,32 +115,104 @@ def validate(val_gen, model, metrics, validation_steps):
                 X_var, y_var = X_var.cuda(), y_var.cuda()
             y_pred = model(X_var)
             for i in range(len(metrics)):
+                # if using previous torch versions
                 # losses[i].update(metrics[i](y_pred, y_var).data[0])
                 losses[i].update(metrics[i](y_pred, y_var).item())
 
         for metric,loss in zip(metrics, losses):
             print("val_{}: {}".format(metric.__repr__().split("(")[0], loss.val))
 
-use_cuda = torch.cuda.is_available()
-model = BiRNNCharTagger(3,96,128)
-model = model.cuda()
-criterion = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.01)
-train_gen = generate_batches(train_a, juma, train_b, jumb, batch_size, seq_len)
-val_gen = generate_batches(val_a, juma, val_b, jumb, batch_size, seq_len)
-epochs = 3
-steps_per_epoch = 100
-validation_steps = 50
 
-metrics = [nn.MSELoss(), nn.BCELoss(), Accuracy()]
-for epoch in range(epochs):
-    train(train_gen, model, criterion, optimizer, epoch, steps_per_epoch)
-    validate(val_gen, model, metrics, validation_steps)
+def main(model_path, dir_a, dir_b, min_jump_size_a, max_jump_size_a, min_jump_size_b,
+    max_jump_size_b, seq_len, batch_size, rnn_size, lstm_layers, dropout_rate,
+    bidirectional, steps_per_epoch, validation_steps, epochs):
 
-# MODEL_DIR = 'models'
-# if not os.path.exists(MODEL_DIR):
-#     os.makedirs(MODEL_DIR)
-# torch.save(model.state_dict(), os.path.join(MODEL_DIR,'model.pkl'))
+    train_a = glob(os.path.join(dir_a, "train/*"))
+    train_b = glob(os.path.join(dir_b, "train/*"))
+    val_a = glob(os.path.join(dir_a, "test/*"))
+    val_b = glob(os.path.join(dir_b, "test/*"))
+
+    juma = [min_jump_size_a, max_jump_size_a]
+    jumb = [min_jump_size_b, max_jump_size_b]
+
+    if bidirectional:
+        model = BiRNNCharTagger(lstm_layers,n_chars,rnn_size)
+    else:
+        model = RNNCharTagger(lstm_layers,n_chars,rnn_size)
+    if use_cuda:
+        model = model.cuda()
+
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
+    train_gen = generate_batches(train_a, juma, train_b, jumb, batch_size, seq_len)
+    val_gen = generate_batches(val_a, juma, val_b, jumb, batch_size, seq_len)
+
+    metrics = [nn.MSELoss(), nn.BCELoss(), Accuracy()]
+    for epoch in range(epochs):
+        train(train_gen, model, criterion, optimizer, epoch, steps_per_epoch)
+        validate(val_gen, model, metrics, validation_steps)
+
+    MODEL_DIR = model_path.split("/")[0]
+    if not os.path.exists(MODEL_DIR):
+        os.makedirs(MODEL_DIR)
+    torch.save(model.state_dict(), model_path)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser("train tagger and save trained model")
+    parser.add_argument("model_path", help=
+        "Path where to save trained model. If this path exists, a model will be loaded from it. "
+        "Otherwise a new one will be constructed. The model will be saved to this path after "
+        "every epoch.")
+    parser.add_argument("dir_a", help="directory with first source of input files. It should "
+                                      "contain 'train' and 'test' subdirectories that contain "
+                                      "actual files")
+    parser.add_argument("dir_b", help="directory with second source of input files. It should "
+                                      "contain 'train' and 'test' subdirectories that contain "
+                                      "actual files")
+    parser.add_argument("--min_jump_a", type=int, default=20, help="snippets from source A will "
+                                                                   "be at least this long")
+    parser.add_argument("--max_jump_a", type=int, default=200, help="snippets from source B will "
+                                                                    "be at most this long")
+    parser.add_argument("--min_jump_b", type=int, default=20, help="snippets from source B will "
+                                                                   "be at least this long")
+    parser.add_argument("--max_jump_b", type=int, default=200, help="snippets from source B will "
+                                                                    "be at most this long")
+    parser.add_argument("--sequence_length", type=int, default=100, help="how many characters in "
+                                                                         "single sequence")
+    parser.add_argument("--batch_size", type=int, default=1024)
+    parser.add_argument("--rnn_size", type=int, default=128, help="how many LSTM units per layr")
+    parser.add_argument("--lstm_layers", type=int, default=3, help="how many LSTM layers")
+    parser.add_argument("--dropout_rate", type=int, default=0.2, help="dropout rate for a "
+                                                                      "droupout layer inserted "
+                                                                      "after every LSTM layer")
+    parser.add_argument("--bidirectional", action="store_true",
+                        help="Whether to use bidirectional LSTM. If true, inserts a backwards LSTM"
+                        " layer after every normal layer.")
+    parser.add_argument("--steps_per_epoch", type=int, default=100)
+    parser.add_argument("--validation_steps", type=int, default=50)
+    parser.add_argument("--epochs", type=int, default=3)
+
+    args = parser.parse_args()
+
+    main(
+        args.model_path,
+        args.dir_a,
+        args.dir_b,
+        args.min_jump_a,
+        args.max_jump_a,
+        args.min_jump_b,
+        args.max_jump_b,
+        args.sequence_length,
+        args.batch_size,
+        args.rnn_size,
+        args.lstm_layers,
+        args.dropout_rate,
+        args.bidirectional,
+        args.steps_per_epoch,
+        args.validation_steps,
+        args.epochs)
+
 
 # gen = generate_batches(val_a, juma, val_b, jumb, batch_size, seq_len, return_text=True)
 # steps = 50

@@ -38,9 +38,6 @@ def splice_texts(files_a, jump_size_a, files_b, jump_size_b):
 
 
 def generate_batches(files_a, jump_size_a, files_b, jump_size_b, batch_size, sample_len, return_text=False):
-    # This generators will generate an infinite sequence of characters
-    # belonging to source 1/0. per bach, the sequence will be "cut" as
-    # sample_len
     gens = [splice_texts(files_a, jump_size_a, files_b, jump_size_b) for _ in range(batch_size)]
     while True:
         X = []
@@ -68,7 +65,7 @@ def generate_batches(files_a, jump_size_a, files_b, jump_size_b, batch_size, sam
 
 def main(model_path, dir_a, dir_b, min_jump_size_a, max_jump_size_a, min_jump_size_b,
     max_jump_size_b, seq_len, batch_size, rnn_size, lstm_layers, dropout_rate,
-    bidirectional, steps_per_epoch, epochs):
+    bidirectional, steps_per_epoch, validation_steps, epochs):
 
         train_a = glob(os.path.join(dir_a, "train/*"))
         train_b = glob(os.path.join(dir_b, "train/*"))
@@ -103,7 +100,7 @@ def main(model_path, dir_a, dir_b, min_jump_size_a, max_jump_size_a, min_jump_si
         model.fit_generator(train_gen,
                             steps_per_epoch=steps_per_epoch,
                             validation_data=validation_gen,
-                            validation_steps=100,
+                            validation_steps=validation_steps,
                             epochs=epochs,
                             callbacks=[checkpointer])
 
@@ -139,8 +136,9 @@ if __name__ == '__main__':
     parser.add_argument("--bidirectional", action="store_true",
                         help="Whether to use bidirectional LSTM. If true, inserts a backwards LSTM"
                         " layer after every normal layer.")
-    parser.add_argument("--steps_per_epoch", type=int, default=1000)
-    parser.add_argument("--epochs", type=int, default=1000)
+    parser.add_argument("--steps_per_epoch", type=int, default=500)
+    parser.add_argument("--validation_steps", type=int, default=100)
+    parser.add_argument("--epochs", type=int, default=3)
 
     args = parser.parse_args()
 
@@ -159,4 +157,5 @@ if __name__ == '__main__':
         args.dropout_rate,
         args.bidirectional,
         args.steps_per_epoch,
+        args.validation_steps,
         args.epochs)

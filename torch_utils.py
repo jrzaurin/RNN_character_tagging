@@ -10,8 +10,8 @@ from torch.autograd import Variable
 class TimeDistributed(nn.Module):
     def __init__(self, module):
         """
+        from here: https://github.com/SeanNaren/deepspeech.pytorch/blob/master/model.py
         Collapses input of dim T*N*H to (T*N)*H, and applies to a module.
-        Allows handling of variable sequence lengths and minibatch sizes.
         :param module: Module to apply input to.
         """
         super(TimeDistributed, self).__init__()
@@ -32,7 +32,9 @@ class TimeDistributed(nn.Module):
 
 
 class AverageMeter(object):
-    """Computes and stores the average and current value"""
+    """Computes and stores the average and current value
+    from here: https://github.com/SeanNaren/deepspeech.pytorch/blob/master/model.py
+    """
     def __init__(self):
         self.reset()
 
@@ -50,12 +52,16 @@ class AverageMeter(object):
 
 
 class Accuracy(nn.Module):
+    """
+    wrapper to compute accuracy
+    """
     def __init__(self):
         super(Accuracy, self).__init__()
 
     def forward(self,y_pred,y):
         y_pred = (y_pred.view(-1, 1) > 0.5).data.float()
         y = y.view(-1, 1).data.float()
+        # if using previous torch versions
         # acc = (y_pred == y).sum()/y.size(0)
         acc = (y_pred == y).sum().item()/y.size(0)
         return Variable(torch.FloatTensor([acc]))
@@ -75,9 +81,6 @@ class RNNCharTagger(nn.Module):
         self.batch_first = batch_first
         self.batch_size = batch_size
 
-        # self.lstm1 =  nn.LSTM(self.input_dim, self.out_dim, batch_first=self.batch_first, dropout=self.dropout)
-        # for i in range(1,self.lstm_layers):
-        #     setattr(self, 'lstm'+str(i+1), nn.LSTM(self.out_dim, self.out_dim, batch_first=self.batch_first, dropout=self.dropout))
         self.lstm1 =  nn.LSTM(self.input_dim, self.out_dim, batch_first=self.batch_first)
         self.drop1 = nn.Dropout(self.dropout)
         for i in range(1,self.lstm_layers):
@@ -89,10 +92,10 @@ class RNNCharTagger(nn.Module):
         self.linear = TimeDistributed(nn.Linear(self.out_dim, 1))
 
         for i in range(self.lstm_layers):
+
+            # one could also initialize as zeros
             # setattr(self, 'h'+str(i+1), nn.Parameter(torch.zeros(1, self.batch_size, self.out_dim)))
             # setattr(self, 'c'+str(i+1), nn.Parameter(torch.zeros(1, self.batch_size, self.out_dim)))
-            # setattr(self, 'h'+str(i+1), nn.Parameter(nn.init.normal(torch.Tensor(1, self.batch_size, self.out_dim))))
-            # setattr(self, 'c'+str(i+1), nn.Parameter(nn.init.normal(torch.Tensor(1, self.batch_size, self.out_dim))))
             setattr(self, 'h'+str(i+1), nn.Parameter(nn.init.normal_(torch.Tensor(1, self.batch_size, self.out_dim))))
             setattr(self, 'c'+str(i+1), nn.Parameter(nn.init.normal_(torch.Tensor(1, self.batch_size, self.out_dim))))
 
