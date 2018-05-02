@@ -71,7 +71,7 @@ class Accuracy(nn.Module):
 
 
 class RNNCharTagger(nn.Module):
-    def __init__(self, lstm_layers, input_dim, out_dim, batch_size=1024, dropout=0.2, batch_first=True):
+    def __init__(self, lstm_layers, input_dim, out_dim, batch_size, dropout, batch_first=True):
         super(RNNCharTagger, self).__init__()
 
         self.lstm_layers = lstm_layers
@@ -121,7 +121,7 @@ class RNNCharTagger(nn.Module):
 
 
 class BiRNNCharTagger(nn.Module):
-    def __init__(self, lstm_layers, input_dim, out_dim, batch_size=1024, dropout=0.2, batch_first=True):
+    def __init__(self, lstm_layers, input_dim, out_dim, batch_size, dropout, batch_first=True):
         super(BiRNNCharTagger, self).__init__()
 
         self.lstm_layers = lstm_layers

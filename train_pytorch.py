@@ -124,7 +124,7 @@ def validate(val_gen, model, metrics, validation_steps):
 
 
 def main(model_path, dir_a, dir_b, min_jump_size_a, max_jump_size_a, min_jump_size_b,
-    max_jump_size_b, seq_len, batch_size, rnn_size, lstm_layers, dropout_rate,
+    max_jump_size_b, seq_len, batch_size, rnn_size, lstm_layers, dropout,
     bidirectional, steps_per_epoch, validation_steps, epochs):
 
     train_a = glob(os.path.join(dir_a, "train/*"))
@@ -136,9 +136,9 @@ def main(model_path, dir_a, dir_b, min_jump_size_a, max_jump_size_a, min_jump_si
     jumb = [min_jump_size_b, max_jump_size_b]
 
     if bidirectional:
-        model = BiRNNCharTagger(lstm_layers,n_chars,rnn_size)
+        model = BiRNNCharTagger(lstm_layers,n_chars,rnn_size,batch_size=batch_size,dropout=dropout)
     else:
-        model = RNNCharTagger(lstm_layers,n_chars,rnn_size)
+        model = RNNCharTagger(lstm_layers,n_chars,rnn_size,batch_size=batch_size,dropout=dropout)
     if use_cuda:
         model = model.cuda()
 
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     parser.add_argument("--batch_size", type=int, default=1024)
     parser.add_argument("--rnn_size", type=int, default=128, help="how many LSTM units per layr")
     parser.add_argument("--lstm_layers", type=int, default=3, help="how many LSTM layers")
-    parser.add_argument("--dropout_rate", type=int, default=0.2, help="dropout rate for a "
+    parser.add_argument("--dropout", type=int, default=0.2, help="dropout rate for a "
                                                                       "droupout layer inserted "
                                                                       "after every LSTM layer")
     parser.add_argument("--bidirectional", action="store_true",
@@ -207,7 +207,7 @@ if __name__ == '__main__':
         args.batch_size,
         args.rnn_size,
         args.lstm_layers,
-        args.dropout_rate,
+        args.dropout,
         args.bidirectional,
         args.steps_per_epoch,
         args.validation_steps,
