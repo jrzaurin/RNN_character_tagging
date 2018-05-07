@@ -147,7 +147,7 @@ def main(model_path, dir_a, dir_b, min_jump_size_a, max_jump_size_a, min_jump_si
     val_gen = generate_batches(val_a, juma, val_b, jumb, batch_size, seq_len)
 
     metrics = [nn.MSELoss(), nn.BCELoss(), Accuracy()]
-    for epoch in range(epochs):
+    for epoch in range(1,epochs+1):
         train(train_gen, model, criterion, optimizer, epoch, steps_per_epoch)
         validate(val_gen, model, metrics, validation_steps)
 
@@ -190,7 +190,7 @@ if __name__ == '__main__':
                         " layer after every normal layer.")
     parser.add_argument("--steps_per_epoch", type=int, default=100)
     parser.add_argument("--validation_steps", type=int, default=50)
-    parser.add_argument("--epochs", type=int, default=3)
+    parser.add_argument("--epochs", type=int, default=5)
 
     args = parser.parse_args()
 

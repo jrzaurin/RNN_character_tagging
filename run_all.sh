@@ -19,5 +19,5 @@ python plot_predictions.py output/sklearn_or_scala_preds_keras output/sklearn_or
 
 # pytorch process
 python train_pytorch.py models/model_pytorch data/sklearn_clean/ data/scalaz_clean --bidirectional
-python apply_tagger_pytorch.py models/model_pytorch output/sklearn_or_scala_preds_pytorch data/sklearn_clean/ data/scalaz_clean
+python apply_tagger_pytorch.py models/model_pytorch output/sklearn_or_scala_preds_pytorch data/sklearn_clean/ data/scalaz_clean --bidirectional
 python plot_predictions.py output/sklearn_or_scala_preds_pytorch output/sklearn_or_scala_preds_pytorch_html

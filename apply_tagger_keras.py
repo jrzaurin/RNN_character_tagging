@@ -6,7 +6,7 @@ import numpy as np
 from keras.models import load_model
 from joblib import dump
 
-from train import generate_batches
+from train_keras import generate_batches
 
 
 def get_batches_and_text(files_a, jump_size_a, files_b, jump_size_b, batch_size, sample_len, n):
