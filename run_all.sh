@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 bash get_data.sh
 
 python prepare_input_files.py data/austen 'austen.txt' data/austen_clean
@@ -14,7 +13,7 @@ python train_test_split.py data/sklearn_clean/ 0.25
 python train_test_split.py data/scalaz_clean/ 0.25
 
 # keras process
-python train_keras.py models/model_keras data/sklearn_clean/ data/scalaz_clean
+python train_keras.py models/model_keras data/sklearn_clean/ data/scalaz_clean --bidirectional
 python apply_tagger_keras.py models/model_keras output/sklearn_or_scala_preds_keras data/sklearn_clean/ data/scalaz_clean
 python plot_predictions.py output/sklearn_or_scala_preds_keras output/sklearn_or_scala_preds_keras_html
 
