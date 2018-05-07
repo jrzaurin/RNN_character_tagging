@@ -13,7 +13,6 @@ for c in charset:
     vec[char2ind[c]] = 1
     char2vec[c] = vec
 
-
 def sanitize_text(text):
     return ''.join(c for c in unidecode(text.decode('utf-8', 'ignore')).replace('\t', '    ') if c in charset)
 

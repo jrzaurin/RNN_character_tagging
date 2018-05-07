@@ -61,8 +61,15 @@ if __name__ == "__main__":
     parser.add_argument("--steps", type=int, default=50, help="how many batches to predict")
     args = parser.parse_args()
 
-    main(args.model_path, args.output_dir, args.dir_a, args.dir_b, args.min_jump_a,
-         args.max_jump_a, args.min_jump_b, args.max_jump_b, args.steps)
+    main(args.model_path,
+        args.output_dir,
+        args.dir_a,
+        args.dir_b,
+        args.min_jump_a,
+        args.max_jump_a,
+        args.min_jump_b,
+        args.max_jump_b,
+        args.steps)
 
 
 

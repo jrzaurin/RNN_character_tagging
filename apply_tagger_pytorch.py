@@ -65,6 +65,7 @@ def main(model_path, output_dir, dir_a, dir_b, min_jump_a, max_jump_a, min_jump_
 
 
 if __name__ == "__main__":
+
     parser = argparse.ArgumentParser(description="Make predictions with a trained tagger")
     parser.add_argument("model_path", help="path to trained model")
     parser.add_argument("output_dir", help="where to put predictions")

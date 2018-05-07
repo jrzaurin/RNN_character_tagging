@@ -11,6 +11,7 @@ class TimeDistributed(nn.Module):
     def __init__(self, module):
         """
         from here: https://github.com/SeanNaren/deepspeech.pytorch/blob/master/model.py
+
         Collapses input of dim T*N*H to (T*N)*H, and applies to a module.
         :param module: Module to apply input to.
         """
@@ -32,8 +33,10 @@ class TimeDistributed(nn.Module):
 
 
 class AverageMeter(object):
-    """Computes and stores the average and current value
+    """
     from here: https://github.com/SeanNaren/deepspeech.pytorch/blob/master/model.py
+
+    Computes and stores the average and current value
     """
     def __init__(self):
         self.reset()

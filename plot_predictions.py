@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import fnmatch
 from joblib import load
 import matplotlib

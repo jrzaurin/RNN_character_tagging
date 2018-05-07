@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import fnmatch
 import os
 import argparse
