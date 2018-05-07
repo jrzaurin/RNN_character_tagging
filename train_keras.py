@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import argparse
 import os
-from glob import glob
-from random import choice
 import numpy as np
+
+from random import choice
+from glob import glob
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Dense, Dropout, LSTM, TimeDistributed, Bidirectional
 from keras.models import Sequential, load_model
