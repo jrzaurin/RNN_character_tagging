@@ -1,6 +1,8 @@
 # Tagging Characters with RNNs
 
-The code in this repo is based on [this post](http://nadbordrozd.github.io/blog/2017/06/03/python-or-scala/) by [Nadbor](http://nadbordrozd.github.io/). We just adapted the code so it works with python 3, implement the process using `pytorch`, and use this project to illustrate the differences between `keras` and `pytorch`
+The code in this repo is based on [this post](http://nadbordrozd.github.io/blog/2017/06/03/python-or-scala/) by [Nadbor](http://nadbordrozd.github.io/). However, the repo is self-contained, so one can understand the process just by going through the files here.
+
+We have adapted the code so it works with python 3, implement the process using `pytorch`, and use this project to illustrate the differences between `keras` and `pytorch`
 
 ## The goal
 
